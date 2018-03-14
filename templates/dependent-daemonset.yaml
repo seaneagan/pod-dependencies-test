@@ -1,0 +1,29 @@
+---
+{{- if .Values.manifests.dependent -}}
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: dependent
+spec:
+  selector:
+    matchLabels:
+      dependent: "true"
+  template:
+    metadata:
+      labels:
+        dependent: "true"
+    spec:
+      nodeSelector:
+        {{ .Values.labels.dependent.node_selector_key }}: {{ .Values.labels.dependent.node_selector_value }}
+      serviceAccountName: pod-dependencies-test
+      initContainers:
+{{ tuple $ $.Values.dependencies.dependent list | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
+      containers:
+        - name: dependent
+          image: {{ .Values.images.tags.dependent }}
+          command:
+            - sh
+            - -c
+            - 'while sleep 3600; do :; done'
+{{ tuple $ $.Values.dependencies.dependent "pod-dependencies-test" | include "helm-toolkit.snippets.kubernetes_pod_rbac_serviceaccount" }}
+{{- end -}}

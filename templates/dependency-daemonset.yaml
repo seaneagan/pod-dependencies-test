@@ -1,0 +1,26 @@
+---
+{{- if .Values.manifests.dependency -}}
+{{- $dependencyLabelsYaml := toYaml .Values.dependency_labels }}
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: dependency
+spec:
+  selector:
+    matchLabels:
+{{ $dependencyLabelsYaml | indent 6 }}
+  template:
+    metadata:
+      labels:
+{{ $dependencyLabelsYaml | indent 10 }}
+    spec:
+      nodeSelector:
+        {{ .Values.labels.dependency.node_selector_key }}: {{ .Values.labels.dependency.node_selector_value }}
+      containers:
+        - name: dependency
+          image: {{ .Values.images.tags.dependency }}
+          command:
+            - sh
+            - -c
+            - 'while sleep 3600; do :; done'
+{{- end -}}

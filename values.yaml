@@ -1,0 +1,45 @@
+# Label nodes with these label to control where dependency and dependent pods
+# are installed in order to test out various scenarios, such as:
+# 1. dependency on same node (satisfied)
+# 2. dependency only on different node (unsatisfied)
+# 3. dependency not on any node (unsatisfied)
+# 3. dependency not on any node (unsatisfied)
+labels:
+  dependency:
+    node_selector_key: dependency
+    node_selector_value: "enabled"
+  dependent:
+    node_selector_key: dependent
+    node_selector_value: "enabled"
+
+images:
+  pull_policy: IfNotPresent
+  tags:
+    dependency: busybox
+    dependent: busybox
+    dep_check: seaneagan/kubernetes-entrypoint
+
+dependencies:
+  dependent:
+    pod:
+      - labels:
+          k1: v1
+          k2: v2
+    # Add any additional pod dependencies or other types of dependencies here to
+    # test in conjunction.
+
+manifests:
+  dependency: true
+  dependent: true
+
+# actual labels of dependency pods
+# change to simulate different labels that what are being depended upon
+dependency_labels:
+  k1: v1
+  k2: v2
+
+# change to simulate unready pods by using an invalid command or similar
+dependency_command:
+  - sh
+  - -c
+  - 'while sleep 3600; do :; done'
